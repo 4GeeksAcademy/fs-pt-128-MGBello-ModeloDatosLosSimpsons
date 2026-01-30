@@ -73,9 +73,7 @@ class Phrase(db.Model):
     character: Mapped["Character"] = relationship(back_populates="phrases")
 
     def serialize(self):
-        return {
-            "phrase": self.text
-        }
+        return self.text
 
 
 class Location(db.Model):
