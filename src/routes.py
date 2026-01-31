@@ -102,21 +102,6 @@ def get_character(id):
     return jsonify(character.serialize_complete()), 201
 
 
-@api.route('/locations', methods=['GET'])
-def get_locations():
-    locations = Location.query.all()
-    response = [location.serialize() for location in locations]
-    return jsonify(response), 200
-
-
-@api.route('/locations/<int:id>', methods=['GET'])
-def get_location(id):
-    location = Location.query.get(id)
-    if not location:
-        return jsonify({"Error": "Not found"}), 404
-    return jsonify(location.serialize()), 201
-
-
 @api.route('/users/<int:user_id>/characters/<int:character_id>', methods=['POST'])
 def add_character_like(user_id, character_id):
     user = User.query.get(user_id)
@@ -145,6 +130,21 @@ def remove_character_likes(user_id, character_id):
 
     db.session.commit()
     return jsonify(user.serialize()), 200
+
+
+@api.route('/locations', methods=['GET'])
+def get_locations():
+    locations = Location.query.all()
+    response = [location.serialize() for location in locations]
+    return jsonify(response), 200
+
+
+@api.route('/locations/<int:id>', methods=['GET'])
+def get_location(id):
+    location = Location.query.get(id)
+    if not location:
+        return jsonify({"Error": "Not found"}), 404
+    return jsonify(location.serialize()), 201
 
 
 @api.route('/users/<int:user_id>/locations/<int:location_id>', methods=['POST'])
