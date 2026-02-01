@@ -9,7 +9,6 @@ def get_users():
     response = [user.serialize() for user in users]
     return jsonify(response), 200
 
-
 @api.route('/users/<int:id>', methods=['GET'])
 def get_user(id):
     user = User.query.get(id)
@@ -17,6 +16,19 @@ def get_user(id):
         return jsonify({"Error": "Not found"}), 404
     return jsonify(user.serialize()), 201
 
+@api.route('/users/<int:id>/favorites', methods=['GET'])
+def get_favorites(id):
+    user = User.query.get(id)
+    if not user:
+        return jsonify({"msg": "Usuario no encontrado"}), 404
+
+    characters_fav = [character.serialize()
+                      for character in user.characters_like]
+    locations_fav = [location.serialize() for location in user.locations_like]
+    return jsonify({
+        "characters": characters_fav,
+        "locations": locations_fav
+    }), 200
 
 @api.route('/users', methods=['POST'])
 def add_user():
@@ -39,7 +51,6 @@ def add_user():
 
     return jsonify(new_user.serialize()), 200
 
-
 @api.route('/users/<int:id>', methods=['PUT'])
 def update_user(id):
     data = request.get_json()
@@ -53,6 +64,13 @@ def update_user(id):
         if check:
             return jsonify({'Error': 'the username already exists'}),400
 
+    new_email = data.get('email')
+
+    if new_email and new_email != user.username:
+        check = User.query.filter_by(username=new_username).first()
+        if check:
+            return jsonify({'Error': 'the username already exists'})
+
     user.username = data.get('username', user.username)
     user.firstname = data.get('firstname', user.firstname)
     user.lastname = data.get('lastname', user.lastname)
@@ -61,7 +79,6 @@ def update_user(id):
 
     db.session.commit()
     return jsonify(user.serialize()), 200
-
 
 @api.route('/phrase', methods=['POST'])
 def add_phrase():
@@ -82,13 +99,11 @@ def add_phrase():
     db.session.commit()
     return jsonify(new_phrase.serialize()), 201
 
-
 @api.route('/characters', methods=['GET'])
 def get_characters():
     characters = Character.query.all()
     response = [character.serialize() for character in characters]
     return jsonify(response), 200
-
 
 @api.route('/characters/<int:id>', methods=['GET'])
 def get_character(id):
@@ -96,7 +111,6 @@ def get_character(id):
     if not character:
         return jsonify({"Error": "Not found"}), 404
     return jsonify(character.serialize_complete()), 201
-
 
 @api.route('/users/<int:user_id>/characters/<int:character_id>', methods=['POST'])
 def add_character_like(user_id, character_id):
@@ -113,7 +127,6 @@ def add_character_like(user_id, character_id):
 
     return jsonify(user.serialize()), 200
 
-
 @api.route('/users/<int:user_id>/characters/<int:character_id>', methods=['DELETE'])
 def remove_character_likes(user_id, character_id):
     user = User.query.get(user_id)
@@ -127,13 +140,11 @@ def remove_character_likes(user_id, character_id):
     db.session.commit()
     return jsonify(user.serialize()), 200
 
-
 @api.route('/locations', methods=['GET'])
 def get_locations():
     locations = Location.query.all()
     response = [location.serialize() for location in locations]
     return jsonify(response), 200
-
 
 @api.route('/locations/<int:id>', methods=['GET'])
 def get_location(id):
@@ -141,7 +152,6 @@ def get_location(id):
     if not location:
         return jsonify({"Error": "Not found"}), 404
     return jsonify(location.serialize()), 201
-
 
 @api.route('/users/<int:user_id>/locations/<int:location_id>', methods=['POST'])
 def add_locations_like(user_id, location_id):
@@ -157,7 +167,6 @@ def add_locations_like(user_id, location_id):
     db.session.commit()
 
     return jsonify(user.serialize()), 200
-
 
 @api.route('/users/<int:user_id>/locations/<int:location_id>', methods=['DELETE'])
 def remove_location_likes(user_id, location_id):

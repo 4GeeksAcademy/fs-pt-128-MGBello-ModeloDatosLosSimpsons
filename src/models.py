@@ -9,7 +9,7 @@ db = SQLAlchemy()
 favorites = Table(
     "favorites",
     db.metadata,
-    Column("id", db.Integer, primary_key=True),  
+    Column("id", db.Integer, primary_key=True),
     Column("user_id", ForeignKey("user.id"), nullable=False),
     Column("character_id", ForeignKey("character.id"), nullable=True),
     Column("location_id", ForeignKey("location.id"), nullable=True)
@@ -22,17 +22,20 @@ class User(db.Model):
         String(120), unique=True, nullable=False)
     firstname: Mapped[str] = mapped_column(String(120), nullable=False)
     lastname: Mapped[str] = mapped_column(String(120), nullable=False)
-    email: Mapped[str] = mapped_column(String(120), nullable=False)
+    email: Mapped[str] = mapped_column(
+        String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(120), nullable=False)
     characters_like: Mapped[List["Character"]] = relationship(
+        "Character",
         secondary=favorites,
         back_populates="users_characters_like",
-
+        overlaps="locations_like,users_characters_like,users_locations_like"
     )
+
     locations_like: Mapped[List["Location"]] = relationship(
         secondary=favorites,
         back_populates="users_locations_like",
-
+        overlaps="characters_like,users_characters_like,users_locations_like"
     )
 
     def serialize(self):
@@ -59,7 +62,8 @@ class Character(db.Model):
     occupation: Mapped[str] = mapped_column(String(255))
     users_characters_like: Mapped[List["User"]] = relationship(
         secondary=favorites,
-        back_populates="characters_like"
+        back_populates="characters_like",
+        overlaps="characters_like,locations_like,users_locations_like"
     )
 
     phrases: Mapped[List["Phrase"]] = relationship(
@@ -111,7 +115,8 @@ class Location(db.Model):
     use: Mapped[str] = mapped_column(String(255), nullable=False)
     users_locations_like: Mapped[List["User"]] = relationship(
         secondary=favorites,
-        back_populates="locations_like"
+        back_populates="locations_like",
+        overlaps="characters_like,locations_like,users_characters_like"
     )
 
     def serialize(self):
