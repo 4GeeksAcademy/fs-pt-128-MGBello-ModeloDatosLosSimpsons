@@ -9,7 +9,7 @@ db = SQLAlchemy()
 favorites = Table(
     "favorites",
     db.metadata,
-    Column("id", db.Integer, primary_key=True),  # El nuevo jefe
+    Column("id", db.Integer, primary_key=True),  
     Column("user_id", ForeignKey("user.id"), nullable=False),
     Column("character_id", ForeignKey("character.id"), nullable=True),
     Column("location_id", ForeignKey("location.id"), nullable=True)
