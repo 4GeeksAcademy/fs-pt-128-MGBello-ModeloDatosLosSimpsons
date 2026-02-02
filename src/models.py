@@ -44,6 +44,15 @@ class User(db.Model):
             "username": self.username,
             "firstname": self.firstname,
             "lastname": self.lastname,
+            "email": self.email
+        }
+
+    def serialize_complete(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "firstname": self.firstname,
+            "lastname": self.lastname,
             "email": self.email,
             "favorites": {
                 "characters": [character.serialize() for character in self.characters_like],
