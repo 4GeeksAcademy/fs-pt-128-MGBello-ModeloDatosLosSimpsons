@@ -6,12 +6,18 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 db = SQLAlchemy()
 
-favorites = Table(
-    "favorites",
+favorite_character = Table(
+    "favorite_character",
     db.metadata,
     Column("id", db.Integer, primary_key=True),
     Column("user_id", ForeignKey("user.id"), nullable=False),
-    Column("character_id", ForeignKey("character.id"), nullable=True),
+    Column("character_id", ForeignKey("character.id"), nullable=True)
+)
+favorite_location = Table(
+    "favorite_location",
+    db.metadata,
+    Column("id", db.Integer, primary_key=True),
+    Column("user_id", ForeignKey("user.id"), nullable=False),
     Column("location_id", ForeignKey("location.id"), nullable=True)
 )
 
@@ -27,15 +33,15 @@ class User(db.Model):
     password: Mapped[str] = mapped_column(String(120), nullable=False)
     characters_like: Mapped[List["Character"]] = relationship(
         "Character",
-        secondary=favorites,
+        secondary=favorite_character,
         back_populates="users_characters_like",
-        overlaps="locations_like,users_characters_like,users_locations_like"
+
     )
 
     locations_like: Mapped[List["Location"]] = relationship(
-        secondary=favorites,
-        back_populates="users_locations_like",
-        overlaps="characters_like,users_characters_like,users_locations_like"
+        "Location",
+        secondary=favorite_location,
+        back_populates="users_locations_like"
     )
 
     def serialize(self):
@@ -70,15 +76,17 @@ class Character(db.Model):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     occupation: Mapped[str] = mapped_column(String(255))
     users_characters_like: Mapped[List["User"]] = relationship(
-        secondary=favorites,
+        secondary=favorite_character,
         back_populates="characters_like",
-        overlaps="characters_like,locations_like,users_locations_like"
     )
 
     phrases: Mapped[List["Phrase"]] = relationship(
         back_populates="character"
     )
     status: Mapped[str] = mapped_column(String(120), nullable=False)
+
+    def __repr__(self):
+        return self.name
 
     def serialize(self):
         return {
@@ -123,9 +131,8 @@ class Location(db.Model):
     town: Mapped[str] = mapped_column(String(255), nullable=False)
     use: Mapped[str] = mapped_column(String(255), nullable=False)
     users_locations_like: Mapped[List["User"]] = relationship(
-        secondary=favorites,
+        secondary=favorite_location,
         back_populates="locations_like",
-        overlaps="characters_like,locations_like,users_characters_like"
     )
 
     def serialize(self):
