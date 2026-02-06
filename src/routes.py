@@ -137,7 +137,7 @@ def add_character_like(user_id, character_id):
     user.characters_like.append(character)
     db.session.commit()
 
-    return jsonify(user.serialize()), 200
+    return jsonify(user.serialize_complete()), 200
 
 
 @api.route('/users/<int:user_id>/characters/<int:character_id>', methods=['DELETE'])
@@ -151,7 +151,7 @@ def remove_character_likes(user_id, character_id):
         user.characters_like.remove(character)
 
     db.session.commit()
-    return jsonify(user.serialize()), 200
+    return jsonify({"msg": "Character deleted succesfully"}), 200
 
 
 @api.route('/locations', methods=['GET'])
@@ -175,9 +175,9 @@ def add_locations_like(user_id, location_id):
     location = Location.query.get(location_id)
 
     if not user or not location:
-        return jsonify({'Error': 'User or character not found'}), 404
+        return jsonify({'Error': 'User or location not found'}), 404
     if location in user.characters_like:
-        return jsonify({"msg": "Este personaje ya es favorito"}), 400
+        return jsonify({"msg": "This location is already a favorite"}), 400
 
     user.locations_like.append(location)
     db.session.commit()
@@ -191,9 +191,9 @@ def remove_location_likes(user_id, location_id):
     location = Location.query.get(location_id)
 
     if not user or not location:
-        return jsonify({'Error': 'User or character not found'}), 404
+        return jsonify({'Error': 'User or location not found'}), 404
     if location in user.locations_like:
         user.locations_like.remove(location)
 
     db.session.commit()
-    return jsonify(user.serialize()), 200
+    return jsonify(user.serialize_complete()), 200
